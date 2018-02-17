@@ -31,6 +31,8 @@ public class Robot extends IterativeRobot {
 	final double Ki = 0;
 	final double Kd = 0.0275;
 	final double delay = 0.004;
+	
+	double target = 0;
 
 	@Override
 	public void robotInit() {
@@ -47,7 +49,7 @@ public class Robot extends IterativeRobot {
 
 		rearRight = new VictorSP(1);
 		rearRight.setInverted(true);
-		
+
 		left = new SpeedControllerGroup(frontLeft, rearLeft);
 		right = new SpeedControllerGroup(frontRight, rearRight);
 
@@ -60,6 +62,18 @@ public class Robot extends IterativeRobot {
 		// frontRightPID = new PIDController(Kp, Ki, Kd, gyro, frontLeft);
 		// rearRightPID = new PIDController(Kp, Ki, Kd, gyro, frontLeft);
 
+	}
+
+	@Override
+	public void robotPeriodic() {
+	}
+
+	@Override
+	public void disabledInit() {
+	}
+
+	@Override
+	public void disabledPeriodic() {
 	}
 
 	@Override
@@ -83,7 +97,8 @@ public class Robot extends IterativeRobot {
 				output = -0.6;
 
 			}
-			base.arcadeDrive(0, output);
+			System.out.print(-output);
+			base.arcadeDrive(0, -output);
 			Timer.delay(delay);
 			PLast = PCurrent;
 			PCurrent = target - gyro.getAngle();
@@ -99,31 +114,37 @@ public class Robot extends IterativeRobot {
 	}
 
 	@Override
+	public void teleopInit() {
+		gyro.reset();
+		target = gyro.getAngle();
+	}
+
+	@Override
 	public void teleopPeriodic() {
+		double PCurrent = target - gyro.getAngle();
+		double PLast = PCurrent;
+		double D = PLast - PCurrent;
+		double output = (PCurrent * Kp) - (D * Kd);
 
-		// base.arcadeDrive(joy.getRawAxis(1), joy.getRawAxis(4));
-		if (joy.getRawButton(1)) {
+		// while (output != 0 && gyro.getAngle() != target) {
+		
+		 if (output > 0.6) {
+		 output = 0.6;
+		 } else if (output < -0.6) {
+		 output = -0.6;
+		
+		 }
+		
+		// }
 
-			frontLeft.set(0.5);
-			Timer.delay(delay);
-
-		} else if (joy.getRawButton(2)) {
-
-			rearLeft.set(0.5);
-			Timer.delay(delay);
-
-		} else if (joy.getRawButton(3)) {
-
-			frontRight.set(0.5);
-			Timer.delay(delay);
-
-		} else if (joy.getRawButton(4)) {
-
-			rearRight.set(0.5);
-			Timer.delay(delay);
-
+		if (joy.getRawAxis(4) < -0.05 || joy.getRawAxis(4) > 0.05) {
+			base.arcadeDrive(joy.getRawAxis(1), -joy.getRawAxis(4), true);
+			gyro.reset();
+		} else {
+			base.arcadeDrive(joy.getRawAxis(1), -output, true);
 		}
-
+		System.out.print("output: " + output);
+		System.out.print("target: " + target);
 	}
 
 	// public double getOutput(double angle) {
