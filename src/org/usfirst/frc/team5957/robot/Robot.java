@@ -3,19 +3,22 @@ package org.usfirst.frc.team5957.robot;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.VictorSP;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 public class Robot extends IterativeRobot {
 
-	RobotDrive base;
+	DifferentialDrive base;
 	SpeedController frontLeft;
 	SpeedController rearLeft;
 	SpeedController frontRight;
 	SpeedController rearRight;
+	SpeedControllerGroup left;
+	SpeedControllerGroup right;
 	Joystick joy;
 	ADXRS450_Gyro gyro;
 	Timer time;
@@ -44,8 +47,11 @@ public class Robot extends IterativeRobot {
 
 		rearRight = new VictorSP(1);
 		rearRight.setInverted(true);
+		
+		left = new SpeedControllerGroup(frontLeft, rearLeft);
+		right = new SpeedControllerGroup(frontRight, rearRight);
 
-		base = new RobotDrive(rearLeft, frontLeft, rearRight, frontRight);
+		base = new DifferentialDrive(left, right);
 		joy = new Joystick(0);
 		gyro = new ADXRS450_Gyro();
 		time = new Timer();
