@@ -87,18 +87,27 @@ public class Robot extends IterativeRobot {
 		double PCurrent = target - gyro.getAngle(); // 90 - 0
 		double PLast = PCurrent; // 90
 		double D = PLast - PCurrent; // 0
-		double output = (PCurrent * Kp) - (D * Kd); // 0.9 - 0
+		double I = 0;
+		double IIncrement = 0.01;
+		
+		if( (target < 0 && gyro.getAngle() > target - 30) || (target > 0 && gyro.getAngle() < target + 30)) {
+			I = 0;
+		} else {
+			I = I + IIncrement;
+		}
+		double output = (PCurrent * Kp) + (I * Ki) - (D * Kd); // 0.9 + 0 - 0 
 
 		while (output != 0 && gyro.getAngle() != target) {
-
+ 
 			if (output > 0.6) {
 				output = 0.6;
 			} else if (output < -0.6) {
 				output = -0.6;
 
 			}
-			System.out.print(-output);
-			base.arcadeDrive(0, -output);
+			System.out.print("P: " + PCurrent + " I: " + I + " D: " + D);
+			System.out.print("Turn Speed: " + output); 
+			base.arcadeDrive(0, -output); // TODO: reverse back to normal for new robot
 			Timer.delay(delay);
 			PLast = PCurrent;
 			PCurrent = target - gyro.getAngle();
