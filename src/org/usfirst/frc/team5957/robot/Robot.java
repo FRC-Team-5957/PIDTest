@@ -28,11 +28,11 @@ public class Robot extends IterativeRobot {
 	// PIDController rearRightPID;
 
 	final double Kp = 0.05;
-	final double Ki = 0;
-	final double Kd = 0.0275;
+	final double Ki = 0.0;
+	final double Kd = 0.0;
 	final double delay = 0.004;
 	
-	double target = 0;
+	double target = 90;
 
 	@Override
 	public void robotInit() {
@@ -81,8 +81,6 @@ public class Robot extends IterativeRobot {
 		time.reset();
 		gyro.reset();
 		time.start();
-
-		double target = 90;
 
 		double PCurrent = target - gyro.getAngle(); // 90 - 0
 		double PLast = PCurrent; // 90
