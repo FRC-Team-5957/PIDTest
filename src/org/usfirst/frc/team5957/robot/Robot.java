@@ -27,7 +27,7 @@ public class Robot extends IterativeRobot {
 	// PIDController rearRightPID;
 
 	final double Kp = 0.2125;
-	final double Kd = 0.4; // Kd = 6.4 when Kp = 0.3 can do 90 degrees turn
+	final double Kd = 3.2; // Kd = 6.4 when Kp = 0.3 can do 90 degrees turn
 	final double delay = 0.004;
 
 	double target = 0;
@@ -87,31 +87,61 @@ public class Robot extends IterativeRobot {
 	public void disabledPeriodic() {
 	}
 
+	boolean straightAuto = true;
+
 	@Override
 	public void autonomousInit() {
 		time.reset();
 		time.start();
-		double target = 90;
-		double PCurrent = target - gyro.getAngle(); // 90 - 0
-		double PLast = PCurrent; // 90
-		double D = PLast - PCurrent; // 0
-		double output = (PCurrent * Kp) - (D * Kd); // 0.9 - 0
+		if (straightAuto == false) { // turn to 90 degrees
+			double target = 90;
+			double PCurrent = target - gyro.getAngle(); // 90 - 0
+			double PLast = PCurrent; // 90
+			double D = PLast - PCurrent; // 0
+			double output = (PCurrent * Kp) - (D * Kd); // 0.9 - 0
 
-		while (output != 0 && gyro.getAngle() != target) {
-			if (output > 0.6) {
-				output = 0.6;
-			} else if (output < -0.6) {
-				output = -0.6;
+			while (output != 0 && gyro.getAngle() != target) {
+				if (output > 0.6) {
+					output = 0.6;
+				} else if (output < -0.6) {
+					output = -0.6;
 
+				}
+				System.out.print(-output);
+				base.arcadeDrive(0, -output);
+				Timer.delay(delay);
+				PLast = PCurrent;
+				PCurrent = target - gyro.getAngle();
+				D = PLast - PCurrent;
+				output = (PCurrent * Kp) - (D * Kd);
 			}
-			System.out.print(-output);
-			base.arcadeDrive(0, -output);
-			Timer.delay(delay);
-			PLast = PCurrent;
-			PCurrent = target - gyro.getAngle();
-			D = PLast - PCurrent;
-			output = (PCurrent * Kp) - (D * Kd);
+		} else { //drive for 2 secs
+			double target = 0;
+			double PCurrent = target - gyro.getAngle(); // 90 - 0
+			double PLast = PCurrent; // 90
+			double D = PLast - PCurrent; // 0
+			double output = (PCurrent * Kp) - (D * Kd); // 0.9 - 0
+			while (output != 0 && gyro.getAngle() != target) {
+				if (output > 0.6) {
+					output = 0.6;
+				} else if (output < -0.6) {
+					output = -0.6;
+
+				}
+				System.out.print(-output);
+				Timer.delay(delay);
+				PLast = PCurrent;
+				PCurrent = target - gyro.getAngle();
+				D = PLast - PCurrent;
+				output = (PCurrent * Kp) - (D * Kd);
+				if (time.get() < 2) {
+					base.arcadeDrive(-0.6, -output);
+				} else {
+					base.arcadeDrive(0, -output);
+				}
+			}
 		}
+
 	}
 
 	@Override
